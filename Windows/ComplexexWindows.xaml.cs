@@ -12,14 +12,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace ECGTools
+namespace ECGTools.Windows
 {
     /// <summary>
-    /// Логика взаимодействия для ComplexesWindows.xaml
+    /// Логика взаимодействия для ComplexexWindows.xaml
     /// </summary>
-    public partial class ComplexesWindows : Window
+    public partial class ComplexexWindows : Window
     {
-        public ComplexesWindows()
+        public ComplexexWindows()
         {
             InitializeComponent();
         }

@@ -80,11 +80,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="ClassesWindows.xaml">
+    <Page Include="Windows\ClassesWindows.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ComplexesWindows.xaml">
+    <Page Include="Windows\ComplexexWindows.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -96,11 +96,11 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ClassesWindows.xaml.cs">
+    <Compile Include="Windows\ClassesWindows.xaml.cs">
       <DependentUpon>ClassesWindows.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ComplexesWindows.xaml.cs">
-      <DependentUpon>ComplexesWindows.xaml</DependentUpon>
+    <Compile Include="Windows\ComplexexWindows.xaml.cs">
+      <DependentUpon>ComplexexWindows.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -137,8 +137,6 @@
   <ItemGroup>
     <Resource Include="EDFCSharp.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Windows\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

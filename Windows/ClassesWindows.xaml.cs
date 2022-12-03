@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace ECGTools
+namespace ECGTools.Windows
 {
     /// <summary>
     /// Логика взаимодействия для ClassesWindows.xaml
