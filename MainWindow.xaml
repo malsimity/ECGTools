@@ -9,13 +9,18 @@
     <Grid>
         <Menu Name="Menu" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.ColumnSpan="4" Panel.ZIndex="-3">
             <MenuItem Name="Menu_File" Header="Файл">
-                <MenuItem Name="Menu_Import_Open" Header="Импорт записи"></MenuItem>
+                <MenuItem Name="Menu_Import_Open" Header="Импорт записи" Click="Menu_Import_Open_OnClick"></MenuItem>
                 <MenuItem Name="Menu_Export_Open" Header="Экспорт записи"></MenuItem>
             </MenuItem>
         </Menu>
         <WpfPlot Name="Plot" Margin="0,112,0,112.0"/>
         <Button Name="btClassificate" Content="Классификация" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="130" Height="50"/>
         <Button Name="btDetect" Content="Детектирование QRS комплексов" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom" Width="205" Height="50"/>
-        <CheckBox Name="cbFilt" Content="Фильтрация сигнала" HorizontalAlignment="Left" Margin="10,0,0,25" VerticalAlignment="Bottom"/>
+        <CheckBox Name="cbFilt" Content="Фильтрация сигнала" HorizontalAlignment="Left" Margin="10,0,0,70.6" VerticalAlignment="Bottom" Checked="CbFilt_OnChecked" Unchecked="CbFilt_OnUnchecked"/>
+        <TextBox Name="tbLowfreq" Text="0" Margin="10,0,0,17.6" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="30" PreviewTextInput="NumberValidationTextBox"/>
+        <TextBox Name="tbHightfreq" Text="1" Margin="97,0,0,17.6" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="30" PreviewTextInput="NumberValidationTextBox"/>
+        <Label Content="Частоты среза" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="90" Margin="132,0,0,14.6" Height="25" />
+        <Label Content="НЧ" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="30" Height="25" RenderTransformOrigin="0.714,-0.963" Margin="10,0,0,40.6" />
+        <Label Content="ВЧ" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="30" Height="25" Margin="97,0,0,40.6" RenderTransformOrigin="1.321,-1.067" />
     </Grid>
 </Window>
