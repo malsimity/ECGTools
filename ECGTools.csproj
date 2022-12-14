@@ -234,6 +234,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Detector.cs" />
     <Compile Include="FileEDF.cs" />
     <Compile Include="Windows\ClassesWindows.xaml.cs">
       <DependentUpon>ClassesWindows.xaml</DependentUpon>

@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EDFCSharp;
+using Color = System.Drawing.Color;
 
 namespace ECGTools
 {
@@ -28,8 +29,9 @@ namespace ECGTools
             InitializeComponent();
         }
 
-        private EDFSignal signal = null;
-        private double[] filtSig = null;
+        private Signal signal = null;
+        private Signal filtSig = null;
+        private List<QRS> qrs = null;
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
@@ -37,35 +39,37 @@ namespace ECGTools
             e.Handled = regex.IsMatch(e.Text);
         }
 
-        public void PlotSig(EDFSignal signal)
+        private void PlotSig(Signal signal)
         {
-            float[] sig = new float[signal.SamplesCount];
-            float[] x = new float[sig.Length];
-            int freq = (int)signal.FrequencyInHZ;
-            for (int i = 0; i < sig.Length; i++)
-            {
-                sig[i] = (float)signal.ScaledSample(i);
-                sig[i] -= Math.Abs(sig[0]);
-                x[i] = i / (float)freq;
-            }
-
-            Plot.Plot.AddSignalXYConst(x, sig);
+            Plot.Plot.AddSignalXYConst(signal.x, signal.signal);
             Plot.Refresh();
         }
 
-        public void PlotSig(double[] signal, int freq)
+        private void PlotQRS(List<QRS> qrsList, Signal sig)
         {
-            float[] x = new float[signal.Length];
-            for (int i = 0; i < signal.Length; i++)
-                x[i] = i / (float) freq;
+            double[] xs = new double[qrsList.Count];
+            double[] ys = new double[qrsList.Count];
+            for (int i = 0; i < qrsList.Count; i++)
+            {
+                xs[i] = sig.x[qrsList[i].rPeak];
+                ys[i] = sig.signal[qrsList[i].rPeak];
+            }
 
-            Plot.Plot.AddSignalXYConst(x, signal);
+            Plot.Plot.AddScatter(xs, ys, Color.Crimson, 0, 10f);
             Plot.Refresh();
         }
 
         private void Menu_Import_Open_OnClick(object sender, RoutedEventArgs e)
         {
-            signal = FileEDF.ImportEdfSignal();
+            Signal signalBuf = FileEDF.ImportEdfSignal();
+            if (signalBuf != null)
+                signal = signalBuf;
+            else
+                return;
+            Plot.Plot.Clear();
+            filtSig = null;
+            qrs = null;
+            lbCountQRS.Content = "0";
             PlotSig(signal);
         }
 
@@ -74,29 +78,34 @@ namespace ECGTools
             if (signal == null)
             {
                 MessageBox.Show("Ипортируйте данные!");
+                cbFilt.IsChecked = false;
                 return;
             }
 
-            int freq = (int)signal.FrequencyInHZ;
+            int freq = signal.freq;
             int pow = 0;
-            while (Math.Pow(2, pow) < signal.SamplesCount)
+            while (Math.Pow(2, pow) < signal.signal.Length)
             {
                 pow++;
             }
 
             double[] sigBuf = new double[(int)Math.Pow(2, pow)];
-            for (int i = 0; i < signal.SamplesCount; i++)
-                sigBuf[i] = signal.ScaledSample(i);
-            for (int i = (int)signal.SamplesCount; i < (int)Math.Pow(2, pow); i++)
+            for (int i = 0; i < signal.signal.Length; i++)
+                sigBuf[i] = signal.signal[i];
+            for (int i = signal.signal.Length; i < (int)Math.Pow(2, pow); i++)
                 sigBuf[i] = 0;
             
             sigBuf = FftSharp.Filter.BandPass(sigBuf, freq, Convert.ToDouble(tbLowfreq.Text), Convert.ToDouble(tbHightfreq.Text));
-            filtSig = new double[signal.SamplesCount];
-            for (int i = 0; i < signal.SamplesCount; i++)
-                filtSig[i] = sigBuf[i];
+            double[] filtSigBuf = new double[signal.signal.Length];
+            for (int i = 0; i < signal.signal.Length; i++)
+                filtSigBuf[i] = sigBuf[i];
+
+            filtSig = new Signal(filtSigBuf, freq);
 
             Plot.Plot.Clear();
-            PlotSig(filtSig, freq);
+            PlotSig(filtSig);
+            if (qrs != null)
+                PlotQRS(qrs, filtSig);
             tbLowfreq.IsEnabled = false;
             tbHightfreq.IsEnabled = false;
         }
@@ -105,14 +114,61 @@ namespace ECGTools
         {
             if (signal == null)
             {
-                MessageBox.Show("Ипортируйте данные!");
                 return;
             }
 
             Plot.Plot.Clear();
             PlotSig(signal);
+            if (qrs != null)
+                PlotQRS(qrs, signal);
             tbLowfreq.IsEnabled = true;
             tbHightfreq.IsEnabled = true;
+        }
+
+        private void BtDetect_OnClick(object sender, RoutedEventArgs e)
+        {
+            Signal bufSig = null;
+            if (signal == null)
+            {
+                MessageBox.Show("Импортруйте сигнал!");
+                return;
+            }
+
+            if (filtSig != null)
+            {
+                qrs = Detector.Detection(filtSig.signal, filtSig.freq);
+                bufSig = filtSig;
+            }
+            else
+            {
+                qrs = Detector.Detection(signal.signal, signal.freq);
+                bufSig = signal;
+            }
+
+            lbCountQRS.Content = qrs.Count.ToString();
+            PlotQRS(qrs, bufSig);
+        }
+
+        private void Menu_Export_Open_OnClick(object sender, RoutedEventArgs e)
+        {
+            FileEDF.ExportEdfSignal(qrs);
+        }
+
+        private void Menu_Import_Anal_OnClick(object sender, RoutedEventArgs e)
+        {
+            qrs = FileEDF.ImportDataAnaliz();
+            if (qrs == null)
+                return;
+
+            lbCountQRS.Content = qrs.Count;
+            if (cbFilt.IsChecked == false)
+            {
+                PlotQRS(qrs, signal);
+            }
+            else
+            {
+                PlotQRS(qrs, filtSig);
+            }
         }
     }
 }
