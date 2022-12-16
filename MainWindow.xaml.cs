@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ECGTools.Windows;
 using EDFCSharp;
 using Color = System.Drawing.Color;
 
@@ -29,9 +30,10 @@ namespace ECGTools
             InitializeComponent();
         }
 
-        private Signal signal = null;
-        private Signal filtSig = null;
-        private List<QRS> qrs = null;
+        public Signal signal = null;
+        public Signal filtSig = null;
+        public List<QRS> qrs = null;
+        public List<QRSClass> qrsClasses = null;
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
@@ -69,6 +71,7 @@ namespace ECGTools
             Plot.Plot.Clear();
             filtSig = null;
             qrs = null;
+            qrsClasses = null;
             lbCountQRS.Content = "0";
             PlotSig(signal);
         }
@@ -94,7 +97,7 @@ namespace ECGTools
                 sigBuf[i] = signal.signal[i];
             for (int i = signal.signal.Length; i < (int)Math.Pow(2, pow); i++)
                 sigBuf[i] = 0;
-            
+
             sigBuf = FftSharp.Filter.BandPass(sigBuf, freq, Convert.ToDouble(tbLowfreq.Text), Convert.ToDouble(tbHightfreq.Text));
             double[] filtSigBuf = new double[signal.signal.Length];
             for (int i = 0; i < signal.signal.Length; i++)
@@ -169,6 +172,76 @@ namespace ECGTools
             {
                 PlotQRS(qrs, filtSig);
             }
+        }
+
+        private void BtClassificate_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (qrs == null) { MessageBox.Show("Выполните детекцию комплексов!"); return; }
+
+            List<double[]> bufQrsList = new List<double[]>();
+            int stepLeft = signal.freq / 5;
+            int stepRight = signal.freq / 2;
+
+            Signal bufSignal;
+            if (filtSig != null)
+                bufSignal = filtSig;
+            else
+                bufSignal = signal;
+            
+            for (int i = 0; i < qrs.Count; i++)
+            {
+                double[] bufQrs = new double[stepLeft + stepRight];
+                int peak = qrs[i].rPeak;
+                int count = 0;
+
+                if (peak - stepLeft < 0)
+                {
+                    while (peak - stepLeft + count < 0)
+                    {
+                        bufQrs[count] = bufSignal.signal[0];
+                        count++;
+                    }
+
+                    for (int j = 0; j < peak + stepRight; j++)
+                    {
+                        bufQrs[count] = bufSignal.signal[j];
+                        count++;
+                    }
+                    bufQrsList.Add(bufQrs);
+                    continue;
+                }
+
+                if (peak + stepRight > bufSignal.signal.Length - 1)
+                {
+                    for (int j = peak - stepLeft; j < bufSignal.signal.Length; j++)
+                    {
+                        bufQrs[count] = bufSignal.signal[j];
+                        count++;
+                    }
+
+                    for (int j = count; j < bufQrs.Length; j++)
+                    {
+                        bufQrs[count] = bufSignal.signal[signal.signal.Length - 1];
+                        count++;
+                    }
+                    bufQrsList.Add(bufQrs);
+                    continue;
+                }
+
+                for (int j = peak - stepLeft; j < peak + stepRight; j++)
+                {
+                    bufQrs[count] = bufSignal.signal[j];
+                    count++;
+                }
+
+                bufQrsList.Add(bufQrs);
+            }
+
+            qrsClasses = Classificate.FirstClasters(bufQrsList, 0.8);
+
+            ClassesWindows classesWindows = new ClassesWindows(qrsClasses);
+            classesWindows.Owner = this;
+            classesWindows.Show();
         }
     }
 }

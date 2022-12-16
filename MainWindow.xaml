@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ECGTools"
         mc:Ignorable="d"
-        Title="MainWindow" Height="442.8" Width="800">
+        Title="ECGTools" Height="442.8" Width="800">
     <Grid>
         <Menu Name="Menu" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.ColumnSpan="4" Panel.ZIndex="-3">
             <MenuItem Name="Menu_File" Header="Файл">
@@ -15,7 +15,7 @@
             </MenuItem>
         </Menu>
         <WpfPlot Name="Plot" Margin="0,112,0,112.0"/>
-        <Button Name="btClassificate" Content="Классификация" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="130" Height="50"/>
+        <Button Name="btClassificate" Content="Классификация" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="130" Height="50" Click="BtClassificate_OnClick"/>
         <Button Name="btDetect" Content="Детектирование QRS комплексов" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom" Width="205" Height="50" Click="BtDetect_OnClick"/>
         <CheckBox Name="cbFilt" Content="Фильтрация сигнала" HorizontalAlignment="Left" Margin="10,0,0,70.6" VerticalAlignment="Bottom" Checked="CbFilt_OnChecked" Unchecked="CbFilt_OnUnchecked"/>
         <TextBox Name="tbLowfreq" Text="5" Margin="10,0,0,17.6" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="30" PreviewTextInput="NumberValidationTextBox"/>
